@@ -75,12 +75,12 @@ public class ConverterService {
         job.setMessage("Downloading from URL...");
         job.setProgressPercent(10);
 
-        String outputTemplate = outPath.resolve("%(title)s.%(ext)s").toString();
+        String outputTemplate = outPath.toAbsolutePath().resolve("%(title)s.%(ext)s").toString();
 
         List<String> command = List.of(
             ytDlpPath, "--no-playlist",
             "--output", outputTemplate,
-            "--print", "filename",
+            "--print", "after_move:filepath",
             job.getUrl()
         );
 
@@ -94,7 +94,7 @@ public class ConverterService {
             String line;
             while ((line = reader.readLine()) != null) {
                 log.info("[yt-dlp] {}", line);
-                if (line.startsWith(outPath.toString())) {
+                if (!line.isEmpty()) {
                     downloadedFilename = line.trim();
                 }
             }
@@ -120,7 +120,7 @@ public class ConverterService {
         job.setProgressPercent(60);
 
         String baseName = stripExtension(inputFile.getFileName().toString());
-        Path outputFile = outPath.resolve(baseName + "." + targetExt);
+        Path outputFile = outPath.toAbsolutePath().resolve(baseName + "." + targetExt);
 
         List<String> command = buildFfmpegCommand(inputFile, outputFile, job.getOutputFormat());
 
